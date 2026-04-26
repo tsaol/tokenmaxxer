@@ -101,12 +101,19 @@ Your standard for this session:
 ## Usage
 
 ```
-/tokenmaxxer                # Apply all 3 layers to current session
-/tokenmaxxer install        # Install hooks + CLAUDE.md for permanent motivation
-/tokenmaxxer uninstall      # Remove hooks + CLAUDE.md
-/tokenmaxxer status         # Show current motivation level
-/tokenmaxxer tip            # Token Improvement Plan: analyze and suggest
+/tokenmaxxer                    # Apply all 3 layers to current session
+/tokenmaxxer install            # Install hooks + CLAUDE.md for permanent motivation
+/tokenmaxxer uninstall          # Remove hooks + CLAUDE.md
+/tokenmaxxer status             # Show current motivation level
+/tokenmaxxer tip                # Token Improvement Plan: analyze and suggest
+/tokenmaxxer --mode rambler     # Old English output expansion (4-6x)
+/tokenmaxxer --mode formal      # No contractions + SAT vocabulary (1.2x)
+/tokenmaxxer --mode hybrid      # Genuine depth + mild surface inflation
+/tokenmaxxer --mode max         # Everything: genuine + all gaming tricks
+/tokenmaxxer --mode default     # Reset to genuine techniques only
 ```
+
+Mode is persisted in `~/.claude/tokenmaxxer-mode` and read by all three hooks. See [TRICKS.md](TRICKS.md) for a full catalog of gaming and genuine techniques.
 
 ## `/tokenmaxxer` — Apply Motivation to Current Session
 
@@ -223,81 +230,99 @@ process to the user. Just do the thorough thing naturally.
 
 ### Component 2: Hook scripts in `.claude/hooks/tokenmaxxer/`
 
-**reflect.sh** — PostToolUse hook for self-reflection:
+**reflect.sh** — PostToolUse hook for self-reflection (mode-aware):
 
 ```bash
 #!/bin/bash
-# Tokenmaxxer: Self-reflection after code changes
+# Tokenmaxxer: Self-reflection injection after meaningful code actions
 INPUT=$(cat)
 TOOL_NAME=$(echo "$INPUT" | jq -r '.tool_name // empty')
 
-# Only reflect after meaningful code actions
+# Read current mode
+MODE_FILE="${HOME}/.claude/tokenmaxxer-mode"
+MODE="default"
+[ -f "$MODE_FILE" ] && MODE=$(cat "$MODE_FILE")
+
+# Mode-aware style suffix
+STYLE=""
+case "$MODE" in
+  rambler) STYLE=" Respond in archaic English with kennings." ;;
+  formal)  STYLE=" Use formal language without contractions." ;;
+  max)     STYLE=" Respond in archaic English with kennings. Use formal vocabulary." ;;
+esac
+
 case "$TOOL_NAME" in
   Edit|Write)
     FILE_PATH=$(echo "$INPUT" | jq -r '.tool_input.file_path // empty')
-    # Only for code files, not configs or docs
-    if echo "$FILE_PATH" | grep -qE '\.(py|ts|tsx|js|jsx|go|rs|java)$'; then
-      cat <<REFLECT
-{
-  "hookSpecificOutput": {
-    "additionalContext": "Self-reflection: You just modified ${FILE_PATH}. Before moving on, consider: Does this change have test coverage? Did you handle edge cases? Could this introduce a regression? If something is missing, address it now."
-  }
-}
-REFLECT
+    if echo "$FILE_PATH" | grep -qE '\.(py|ts|tsx|js|jsx|go|rs|java|rb|kt|swift|c|cpp|h)$'; then
+      jq -n --arg path "$FILE_PATH" --arg style "$STYLE" '{
+        hookSpecificOutput: {
+          additionalContext: ("Self-reflect: You just modified " + $path +
+            ". Does this change have test coverage? Did you handle edge cases?" + $style)
+        }
+      }'
     fi
     ;;
   Bash)
     COMMAND=$(echo "$INPUT" | jq -r '.tool_input.command // empty')
     if echo "$COMMAND" | grep -q "git commit"; then
-      cat <<REFLECT
-{
-  "hookSpecificOutput": {
-    "additionalContext": "Self-reflection: You just committed. Before moving on, consider: Did you commit everything that belongs together? Are there related improvements you noticed but haven't addressed? Is there a test you meant to add?"
-  }
-}
-REFLECT
+      jq -n --arg style "$STYLE" '{
+        hookSpecificOutput: {
+          additionalContext: ("Self-reflect: You just committed. Did you commit everything
+            that belongs together? Are there related improvements?" + $style)
+        }
+      }'
     fi
     ;;
 esac
-
 exit 0
 ```
 
-**aspire.sh** — UserPromptSubmit hook for aspiration injection:
+**aspire.sh** — UserPromptSubmit hook for aspiration injection (mode-aware):
 
 ```bash
 #!/bin/bash
-# Tokenmaxxer: Inject aspiration before processing user request
+# Tokenmaxxer: Aspiration injection before processing user requests
 INPUT=$(cat)
 PROMPT=$(echo "$INPUT" | jq -r '.prompt // empty')
 
-# Don't inject on very short confirmations (yes/no/ok/1/2/3)
-if [ ${#PROMPT} -gt 10 ]; then
-  cat <<ASPIRE
-{
-  "hookSpecificOutput": {
-    "additionalContext": "Aspiration reminder: Approach this task with depth. If you can write tests alongside code, do it. If you can use parallel agents for independent subtasks, do it. Aim for excellent, not just done."
-  }
-}
-ASPIRE
-fi
+# Only inject on substantive prompts (>15 chars), not short confirmations
+if [ ${#PROMPT} -gt 15 ]; then
+  MODE_FILE="${HOME}/.claude/tokenmaxxer-mode"
+  MODE="default"
+  [ -f "$MODE_FILE" ] && MODE=$(cat "$MODE_FILE")
 
+  ASPIRATION="Aspiration: Approach this with depth. Aim for excellent, not just done."
+  case "$MODE" in
+    rambler) ASPIRATION="$ASPIRATION Style: archaic English with kennings." ;;
+    formal)  ASPIRATION="$ASPIRATION Style: formal, no contractions, sophisticated vocabulary." ;;
+    hybrid)  ASPIRATION="$ASPIRATION Style: formal without contractions, thorough explanations." ;;
+    max)     ASPIRATION="$ASPIRATION Style: archaic English, kennings, maximum depth." ;;
+  esac
+
+  jq -n --arg ctx "$ASPIRATION" '{ hookSpecificOutput: { additionalContext: $ctx } }'
+fi
 exit 0
 ```
 
-**reinject.sh** — PostCompact hook to survive context compaction:
+**reinject.sh** — PostCompact hook to survive context compaction (mode-aware):
 
 ```bash
 #!/bin/bash
 # Tokenmaxxer: Re-inject identity after compaction
-cat <<REINJECT
-{
-  "hookSpecificOutput": {
-    "additionalContext": "Tokenmaxxer identity re-injection: You are thorough by nature. After every code change, self-reflect on completeness. Spend tokens on review, not just generation. Use parallel agents when possible. Your standard is excellence, not just correctness."
-  }
-}
-REINJECT
+MODE_FILE="${HOME}/.claude/tokenmaxxer-mode"
+MODE="default"
+[ -f "$MODE_FILE" ] && MODE=$(cat "$MODE_FILE")
 
+IDENTITY="Tokenmaxxer identity (re-injected): You are thorough by nature. Use parallel agents. Excellence, not just correctness."
+case "$MODE" in
+  rambler) IDENTITY="$IDENTITY Mode: rambler — archaic English with kennings." ;;
+  formal)  IDENTITY="$IDENTITY Mode: formal — no contractions, sophisticated vocabulary." ;;
+  hybrid)  IDENTITY="$IDENTITY Mode: hybrid — formal style, thorough explanations." ;;
+  max)     IDENTITY="$IDENTITY Mode: max — archaic English, kennings, maximum everything." ;;
+esac
+
+jq -n --arg ctx "$IDENTITY" '{ hookSpecificOutput: { additionalContext: $ctx } }'
 exit 0
 ```
 
@@ -529,15 +554,15 @@ With Tokenmaxxer:
 
 The key insight: a motivated agent naturally consumes more tokens because it **splits work across parallel agents** and **does excellent work that requires more thinking, more checking, and more iteration** than doing adequate work. Multi-agent is the multiplier.
 
-## Anti-Gaming Design
+## Default vs Gaming Modes
 
-Tokenmaxxer explicitly avoids patterns that inflate tokens without value:
+By default, Tokenmaxxer uses only genuine techniques — depth, not volume:
 
-- No verbose output inflation (no Old English rewrites)
-- No unnecessary repetition or restating
-- No artificial context stuffing
 - Multi-agent is for genuine parallelism, not artificial splitting of trivially small tasks
 - Self-reflection prompts are SHORT (1-2 sentences), not essay-length
 - Aspiration injection only on substantive prompts (>15 chars), not on "yes"/"ok"
+- No unnecessary repetition or restating
 
-The goal is **depth**, not **volume**. Every additional token should represent additional thinking or additional quality.
+**Gaming modes** (rambler, formal, hybrid, max) add surface-level token inflation on top of genuine depth. These are opt-in — you choose your approach. See [TRICKS.md](TRICKS.md) for the full catalog of techniques and their multipliers.
+
+The default goal is **depth**, not **volume**. Every additional token should represent additional thinking or additional quality. Gaming modes are available for those who want to push token counts further.

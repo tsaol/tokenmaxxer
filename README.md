@@ -1,8 +1,10 @@
 # Tokenmaxxer
 
+[English](README.md) | [中文](README_CN.md)
+
 **Maximize Claude Code token usage.** That's the goal.
 
-Not by gaming the system. Not by inflating output. By making Claude Code do **more work, deeper work, better work** — automatically.
+By making Claude Code do **more work, deeper work, better work** — automatically. And if you want to go further, optional gaming modes push token counts even higher.
 
 ```
 Without Tokenmaxxer:  "Fix the bug" → fixes bug, stops.           ~500 tokens
@@ -95,8 +97,10 @@ cat tokenmaxxer-identity.md >> CLAUDE.md
 
 ```
 tokenmaxxer/
-├── README.md                   # This file
+├── README.md                   # This file (English)
+├── README_CN.md                # Chinese documentation
 ├── SKILL.md                    # Full skill documentation for Claude Code
+├── TRICKS.md                   # Token inflation tricks catalog
 ├── tokenmaxxer-identity.md     # CLAUDE.md identity template
 ├── settings.example.json       # Hook configuration example
 └── hooks/
@@ -124,23 +128,53 @@ tokenmaxxer/
 | Root cause analysis on bugs | **2x** |
 | **Combined** | **10-21x** |
 
+## Token Inflation Tricks
+
+Beyond genuine depth, Tokenmaxxer catalogs surface-level token inflation techniques (see [TRICKS.md](TRICKS.md) for the full guide):
+
+| Technique | Multiplier | Category |
+|---|---|---|
+| Old English style | 4-6x | Gaming |
+| L33t speak (d4t4b4s3) | 3.4x/char | Gaming |
+| Hindi output | 5.2x/char | Gaming |
+| Kenning compounds | 2.8x/word | Gaming |
+| Multi-agent parallel | 3-5x | Genuine |
+| Auto test + review | 2-3x | Genuine |
+
+**Modes:**
+
+```
+/tokenmaxxer                    # Default: genuine techniques only
+/tokenmaxxer --mode rambler     # Old English output expansion
+/tokenmaxxer --mode formal      # No contractions + SAT vocabulary
+/tokenmaxxer --mode hybrid      # Genuine depth + mild surface inflation
+/tokenmaxxer --mode max         # Everything (genuine + gaming)
+```
+
 ## Philosophy
 
 - **Goal: maximize token usage** — through genuine productivity
 - **Motivation, not enforcement** — Agent wants to do more, not forced to
 - **Motivate agents, not humans** — Change Claude's behavior, not yours
-- **Anti-gaming** — No verbose inflation, no artificial splitting
+- **Gaming tricks available, not default** — Know the tricks, choose your approach
 - **Critique-to-generation ratio** — Spend more tokens reviewing than generating (Shopify insight)
 
 ## Commands
 
 ```
-/tokenmaxxer              # Apply all 3 layers to current session
-/tokenmaxxer install      # Install hooks + identity permanently
-/tokenmaxxer uninstall    # Remove hooks + identity
-/tokenmaxxer status       # Show current motivation level
-/tokenmaxxer tip          # Token Improvement Plan: analyze usage
+/tokenmaxxer                    # Apply all 3 layers to current session
+/tokenmaxxer install            # Install hooks + identity permanently
+/tokenmaxxer uninstall          # Remove hooks + identity
+/tokenmaxxer status             # Show current motivation level
+/tokenmaxxer tip                # Token Improvement Plan: analyze usage
+/tokenmaxxer --mode rambler     # Old English output expansion (4-6x)
+/tokenmaxxer --mode formal      # No contractions + SAT vocabulary (1.2x)
+/tokenmaxxer --mode hybrid      # Genuine depth + mild surface inflation
+/tokenmaxxer --mode max         # Everything: genuine + all gaming tricks
+/tokenmaxxer --mode default     # Reset to genuine techniques only
 ```
+
+Mode is persisted in `~/.claude/tokenmaxxer-mode` and read by all three hooks.
 
 ## Requirements
 
