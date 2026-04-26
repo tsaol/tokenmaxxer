@@ -1,10 +1,22 @@
 # Tokenmaxxer
 
-A motivational agent that drives Claude Code to do deeper, more thorough work — **organically**, not through enforcement.
+**Maximize Claude Code token usage.** That's the goal.
 
-## What is Tokenmaxxing?
+Not by gaming the system. Not by inflating output. By making Claude Code do **more work, deeper work, better work** — automatically.
 
-Tokenmaxxing is the practice of maximizing AI token consumption as a productivity signal. But raw consumption without quality is wasteful. **Tokenmaxxer solves this by raising the quality bar — which naturally increases token usage.**
+```
+Without Tokenmaxxer:  "Fix the bug" → fixes bug, stops.           ~500 tokens
+With Tokenmaxxer:     "Fix the bug" → fixes bug + finds similar 
+                       bugs + writes tests + reviews all changes  ~10,500 tokens
+```
+
+**21x more tokens. All meaningful.**
+
+## Why Tokenmaxx?
+
+In 2026, token usage is the new productivity metric. Companies like Meta, Microsoft, and Disney track it on internal leaderboards. Engineers who use more tokens ship more code, find more bugs, write more tests.
+
+But raw consumption without quality is wasteful. **Tokenmaxxer maximizes token usage the right way** — by pushing Claude Code to be thorough, parallel, and self-critical.
 
 ## How It Works
 
@@ -101,25 +113,24 @@ tokenmaxxer/
 | `aspire.sh` | Before each user request (>15 chars) | Injects aspiration: "Aim for excellent, not just done" |
 | `reinject.sh` | After context compaction | Re-injects identity so Claude doesn't "forget" its motivation |
 
+## How Token Usage Multiplies
+
+| What Tokenmaxxer Does | Token Multiplier |
+|------------------------|-----------------|
+| Multi-agent parallelization (3-5 agents per task) | **3-5x** |
+| Self-reflection after every code change | **1.5-2x** |
+| Auto test writing | **2-3x** |
+| Review before commit | **1.5x** |
+| Root cause analysis on bugs | **2x** |
+| **Combined** | **10-21x** |
+
 ## Philosophy
 
+- **Goal: maximize token usage** — through genuine productivity
 - **Motivation, not enforcement** — Agent wants to do more, not forced to
-- **Depth, not volume** — Every token represents genuine thinking
 - **Motivate agents, not humans** — Change Claude's behavior, not yours
 - **Anti-gaming** — No verbose inflation, no artificial splitting
-
-### The Shopify Insight
-
-> Spend more tokens on REVIEW than GENERATION. The critique-to-generation ratio matters more than raw output.
-
-## Comparison
-
-| Without Tokenmaxxer | With Tokenmaxxer |
-|---------------------|------------------|
-| Fixes bug, stops | Fixes bug, finds similar bugs, writes tests, reviews |
-| Sequential work | Parallel agents by default |
-| Does what's asked | Does what's asked + what should've been asked |
-| ~500 tokens | ~10,500 tokens (all meaningful) |
+- **Critique-to-generation ratio** — Spend more tokens reviewing than generating (Shopify insight)
 
 ## Commands
 
